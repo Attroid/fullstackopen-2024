@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
     participant browser
     participant server
@@ -24,3 +25,4 @@ sequenceDiagram
     deactivate server
 
     Note right of browser: redrawNotes() function in spa.js renders notes to browser
+```
