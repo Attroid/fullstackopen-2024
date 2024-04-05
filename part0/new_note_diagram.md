@@ -4,7 +4,7 @@ sequenceDiagram
     participant server
 
     Note right of browser: User types a new note in the input and presses the "Save" button
-    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note
+    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note 'note: "Hello world!"'
     activate server
     Note left of server: Server saves the note in it's data store
     server-->>browser: [302 Found] HTML File
@@ -33,4 +33,5 @@ sequenceDiagram
     deactivate server
 
     Note right of browser: The browser renders fetched notes
+
 ```
