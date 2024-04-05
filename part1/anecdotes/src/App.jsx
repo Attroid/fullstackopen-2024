@@ -31,14 +31,21 @@ const App = () => {
     setVotes(votesClone);
   };
 
+  const mostVotedAnecdote = votes.indexOf(Math.max(...votes));
+
   return (
     <div>
+      <h1>Anecdote of the day</h1>
       {anecdotes[selected]}
       <br />
       has {votes[selected]} votes
       <br />
       <button onClick={voteAnecdote}>vote</button>
       <button onClick={nextAnecdote}>next anecdote</button>
+      <h1>Anecdote with most votes</h1>
+      {anecdotes[mostVotedAnecdote]}
+      <br />
+      has {votes[mostVotedAnecdote]} votes
     </div>
   );
 };
