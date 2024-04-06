@@ -3,16 +3,39 @@ import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
 import personService from "./services/persons";
+import Notification from "./components/Notification";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [filter, setFilter] = useState("");
+
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notificationType, setNotificationType] = useState("");
+  const [notificationTimeoutId, setNotificationTimeoutId] = useState(null);
 
   useEffect(() => {
     personService.getAll().then((persons) => {
       setPersons(persons);
     });
   }, []);
+
+  const showNotification = (message, type) => {
+    if (notificationTimeoutId) {
+      clearTimeout(notificationTimeoutId);
+      setNotificationTimeoutId(null);
+    }
+
+    setNotificationMessage(message);
+    setNotificationType(type);
+
+    const timeoutId = setTimeout(() => {
+      setNotificationMessage("");
+      setNotificationType("");
+      setNotificationTimeoutId(null);
+    }, 3000);
+
+    setNotificationTimeoutId(timeoutId);
+  };
 
   const updateUser = (name, number) => {
     const person = persons.find((person) => person.name === name);
@@ -26,6 +49,7 @@ const App = () => {
     }
 
     personService.update({ ...person, number }).then((updatedPerson) => {
+      showNotification(`Updated ${updatedPerson.name}`, "success");
       setPersons(
         persons.map((person) =>
           person.id === updatedPerson.id ? updatedPerson : person
@@ -45,6 +69,7 @@ const App = () => {
     };
 
     personService.create(person).then((createdPerson) => {
+      showNotification(`Added ${createdPerson.name}`, "success");
       setPersons(persons.concat(createdPerson));
     });
   };
@@ -62,6 +87,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notificationMessage} type={notificationType} />
       <Filter value={filter} onChange={(ev) => setFilter(ev.target.value)} />
       <h3>add a new</h3>
       <PersonForm onSubmit={addPerson} />
