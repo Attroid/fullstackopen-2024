@@ -48,14 +48,23 @@ const App = () => {
       return;
     }
 
-    personService.update({ ...person, number }).then((updatedPerson) => {
-      showNotification(`Updated ${updatedPerson.name}`, "success");
-      setPersons(
-        persons.map((person) =>
-          person.id === updatedPerson.id ? updatedPerson : person
-        )
-      );
-    });
+    personService
+      .update({ ...person, number })
+      .then((updatedPerson) => {
+        showNotification(`Updated ${updatedPerson.name}`, "success");
+        setPersons(
+          persons.map((person) =>
+            person.id === updatedPerson.id ? updatedPerson : person
+          )
+        );
+      })
+      .catch(() => {
+        showNotification(
+          `Information of ${person.name} has already been removed from server`,
+          "error"
+        );
+        setPersons(persons.filter((p) => p.id !== person.id));
+      });
   };
 
   const addPerson = (name, number) => {
