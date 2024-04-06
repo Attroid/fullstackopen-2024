@@ -28,7 +28,10 @@ const App = () => {
       {filteredCountries.length === 1 ? (
         <Country country={filteredCountries[0]} />
       ) : (
-        <CountryList countries={filteredCountries} />
+        <CountryList
+          countries={filteredCountries}
+          onShow={(country) => setFilter(country.name.common)}
+        />
       )}
     </div>
   );

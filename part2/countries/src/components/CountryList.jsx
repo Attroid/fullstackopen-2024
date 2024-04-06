@@ -6,7 +6,10 @@ const CountryList = (props) => {
   return (
     <div>
       {props.countries.map((country) => (
-        <div>{country.name.common}</div>
+        <div>
+          {country.name.common}
+          <button onClick={() => props.onShow(country)}>show</button>
+        </div>
       ))}
     </div>
   );
