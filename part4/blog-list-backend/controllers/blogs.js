@@ -9,6 +9,10 @@ blogRouter.get("/", async (req, res) => {
 });
 
 blogRouter.post("/", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "insufficient access rights" });
+  }
+
   req.body.user = req.user._id;
 
   const blog = new Blog(req.body);
@@ -21,6 +25,10 @@ blogRouter.post("/", async (req, res) => {
 });
 
 blogRouter.delete("/:id", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "insufficient access rights" });
+  }
+
   const blog = await Blog.findById(req.params.id);
 
   if (req.user._id.toString() !== blog.user.toString()) {
