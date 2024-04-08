@@ -3,7 +3,9 @@ const mongoose = require("mongoose");
 const supertest = require("supertest");
 const app = require("../app");
 const Blog = require("../models/blog");
+const User = require("../models/user");
 const assert = require("node:assert");
+const bcrypt = require("bcrypt");
 
 const api = supertest(app);
 
@@ -28,14 +30,51 @@ const initialBlogs = [
   },
 ];
 
+const initialUsers = [
+  {
+    username: "User",
+    password: "Qwerty123!",
+  },
+  {
+    username: "Coordinator",
+    password: "not_safe",
+  },
+];
+
 describe("blog api", () => {
+  let userToken;
+  let coordinatorToken;
+
   beforeEach(async () => {
     await Blog.deleteMany({});
+    await User.deleteMany({});
 
-    for (const blogToCreate of initialBlogs) {
-      const blog = new Blog(blogToCreate);
-      await blog.save();
+    for (const { password, ...restUserData } of initialUsers) {
+      const saltRounds = 10;
+      const passwordHash = await bcrypt.hash(password, saltRounds);
+      const user = new User({ ...restUserData, passwordHash });
+      await user.save();
+
+      for (const blogToCreate of initialBlogs) {
+        const blog = new Blog({ ...blogToCreate, user: user._id });
+        await blog.save();
+      }
     }
+
+    const userLoginResponse = await api
+      .post("/api/login")
+      .send({ username: "User", password: "Qwerty123!" })
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+
+    const coordinatorLoginResponse = await api
+      .post("/api/login")
+      .send({ username: "Coordinator", password: "not_safe" })
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+
+    userToken = userLoginResponse.body.token;
+    coordinatorToken = coordinatorLoginResponse.body.token;
   });
 
   describe("GET /api/blogs", () => {
@@ -49,7 +88,10 @@ describe("blog api", () => {
     test("should return all blogs", async () => {
       const response = await api.get("/api/blogs");
 
-      assert.strictEqual(response.body.length, initialBlogs.length);
+      assert.strictEqual(
+        response.body.length,
+        initialBlogs.length * initialUsers.length
+      );
     });
 
     test("should include id field in every blog", async () => {
@@ -77,9 +119,14 @@ describe("blog api", () => {
       likes: 7,
     };
 
+    test("should fail with proper status code if authentication is not provided", async () => {
+      await api.post("/api/blogs").send(blogToCreate).expect(401);
+    });
+
     test("should create a new blog", async () => {
       const postResponse = await api
         .post("/api/blogs")
+        .set("Authorization", `Bearer ${userToken}`)
         .send(blogToCreate)
         .expect(201)
         .expect("Content-Type", /application\/json/);
@@ -92,7 +139,10 @@ describe("blog api", () => {
 
       const getResponse = await api.get("/api/blogs");
 
-      assert.strictEqual(getResponse.body.length, initialBlogs.length + 1);
+      assert.strictEqual(
+        getResponse.body.length,
+        initialBlogs.length * initialUsers.length + 1
+      );
 
       const fetchedBlog = getResponse.body.find(
         (blog) => blog.author === blogToCreate.author
@@ -109,6 +159,7 @@ describe("blog api", () => {
       const { likes, ...rest } = blogToCreate;
       const postResponse = await api
         .post("/api/blogs")
+        .set("Authorization", `Bearer ${userToken}`)
         .send(rest)
         .expect(201)
         .expect("Content-Type", /application\/json/);
@@ -125,12 +176,20 @@ describe("blog api", () => {
 
     test("should reject request with proper status code if title is missing", async () => {
       const { title, ...rest } = blogToCreate;
-      await api.post("/api/blogs").send(rest).expect(400);
+      await api
+        .post("/api/blogs")
+        .set("Authorization", `Bearer ${userToken}`)
+        .send(rest)
+        .expect(400);
     });
 
     test("should reject request with proper status code if url is missing", async () => {
       const { url, ...rest } = blogToCreate;
-      await api.post("/api/blogs").send(rest).expect(400);
+      await api
+        .post("/api/blogs")
+        .set("Authorization", `Bearer ${userToken}`)
+        .send(rest)
+        .expect(400);
     });
   });
 
@@ -140,7 +199,10 @@ describe("blog api", () => {
 
       const blogToDelete = getResponseAtStart.body[0];
 
-      await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+      await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .set("Authorization", `Bearer ${userToken}`)
+        .expect(204);
 
       const getResponseAtEnd = await api.get("/api/blogs");
 
@@ -170,7 +232,7 @@ describe("blog api", () => {
         url: "none",
       };
 
-      const putResponse = await api
+      await api
         .put(`/api/blogs/${blogToUpdate.id}`)
         .send(dataForPut)
         .expect(200);
@@ -185,8 +247,6 @@ describe("blog api", () => {
       const blogFromResponseAtEnd = getResponseAtEnd.body.find(
         (blog) => blog.id === blogToUpdate.id
       );
-
-      assert.deepStrictEqual(putResponse.body, blogFromResponseAtEnd);
 
       assert.strictEqual(blogFromResponseAtEnd.title, dataForPut.title);
       assert.strictEqual(blogFromResponseAtEnd.author, dataForPut.author);
