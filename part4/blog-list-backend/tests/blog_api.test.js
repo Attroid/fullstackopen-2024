@@ -122,6 +122,16 @@ describe("blog api", () => {
 
       assert.strictEqual(fetchedBlog.likes, 0);
     });
+
+    test("should reject request with proper status code if title is missing", async () => {
+      const { title, ...rest } = blogToCreate;
+      await api.post("/api/blogs").send(rest).expect(400);
+    });
+
+    test("should reject request with proper status code if url is missing", async () => {
+      const { url, ...rest } = blogToCreate;
+      await api.post("/api/blogs").send(rest).expect(400);
+    });
   });
 
   after(async () => {
