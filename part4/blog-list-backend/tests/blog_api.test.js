@@ -69,6 +69,43 @@ describe("blog api", () => {
     });
   });
 
+  describe("POST /api/blogs", () => {
+    const blogToCreate = {
+      author: "Daniel Martin",
+      title: "11 of the most costly software errors in history",
+      url: "https://raygun.com/blog/costly-software-errors-history/",
+      likes: 7,
+    };
+
+    test("should create a new blog", async () => {
+      const postResponse = await api
+        .post("/api/blogs")
+        .send(blogToCreate)
+        .expect(201)
+        .expect("Content-Type", /application\/json/);
+
+      assert.strictEqual(typeof postResponse.body, "object");
+      assert.strictEqual(postResponse.body.author, blogToCreate.author);
+      assert.strictEqual(postResponse.body.title, blogToCreate.title);
+      assert.strictEqual(postResponse.body.url, blogToCreate.url);
+      assert.strictEqual(postResponse.body.likes, blogToCreate.likes);
+
+      const getResponse = await api.get("/api/blogs");
+
+      assert.strictEqual(getResponse.body.length, initialBlogs.length + 1);
+
+      const fetchedBlog = getResponse.body.find(
+        (blog) => blog.author === blogToCreate.author
+      );
+
+      assert.strictEqual(typeof fetchedBlog, "object");
+      assert.strictEqual(fetchedBlog.author, blogToCreate.author);
+      assert.strictEqual(fetchedBlog.title, blogToCreate.title);
+      assert.strictEqual(fetchedBlog.url, blogToCreate.url);
+      assert.strictEqual(fetchedBlog.likes, blogToCreate.likes);
+    });
+  });
+
   after(async () => {
     await mongoose.connection.close();
   });
