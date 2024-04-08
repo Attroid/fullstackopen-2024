@@ -104,6 +104,24 @@ describe("blog api", () => {
       assert.strictEqual(fetchedBlog.url, blogToCreate.url);
       assert.strictEqual(fetchedBlog.likes, blogToCreate.likes);
     });
+
+    test("should default likes to zero", async () => {
+      const { likes, ...rest } = blogToCreate;
+      const postResponse = await api
+        .post("/api/blogs")
+        .send(rest)
+        .expect(201)
+        .expect("Content-Type", /application\/json/);
+
+      assert.strictEqual(postResponse.body.likes, 0);
+
+      const getResponse = await api.get("/api/blogs");
+      const fetchedBlog = getResponse.body.find(
+        (blog) => blog.author === blogToCreate.author
+      );
+
+      assert.strictEqual(fetchedBlog.likes, 0);
+    });
   });
 
   after(async () => {
