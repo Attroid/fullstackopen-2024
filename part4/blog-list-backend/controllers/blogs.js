@@ -9,35 +9,21 @@ blogRouter.get("/", async (req, res) => {
 });
 
 blogRouter.post("/", async (req, res) => {
-  const decodedToken = jwt.verify(req.token, process.env.SECRET);
-
-  if (!decodedToken.id) {
-    return res.status(401).json({ error: "token invalid" });
-  }
-
-  const user = await User.findById(decodedToken.id);
-  req.body.user = user._id;
+  req.body.user = req.user._id;
 
   const blog = new Blog(req.body);
   await blog.save();
 
-  user.blogs = user.blogs.concat(blog._id);
-  await user.save();
+  req.user.blogs = req.user.blogs.concat(blog._id);
+  await req.user.save();
 
   res.status(201).json(blog);
 });
 
 blogRouter.delete("/:id", async (req, res) => {
-  const decodedToken = jwt.verify(req.token, process.env.SECRET);
-
-  if (!decodedToken.id) {
-    return res.status(401).json({ error: "token invalid" });
-  }
-
-  const user = await User.findById(decodedToken.id);
   const blog = await Blog.findById(req.params.id);
 
-  if (user._id.toString() !== blog.user.toString()) {
+  if (req.user._id.toString() !== blog.user.toString()) {
     return res.status(401).json({ error: "insufficient access rights" });
   }
 
