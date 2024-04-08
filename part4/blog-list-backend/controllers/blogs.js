@@ -12,7 +12,7 @@ blogRouter.post("/", async (req, res) => {
   const decodedToken = jwt.verify(req.token, process.env.SECRET);
 
   if (!decodedToken.id) {
-    return response.status(401).json({ error: "token invalid" });
+    return res.status(401).json({ error: "token invalid" });
   }
 
   const user = await User.findById(decodedToken.id);
@@ -28,6 +28,19 @@ blogRouter.post("/", async (req, res) => {
 });
 
 blogRouter.delete("/:id", async (req, res) => {
+  const decodedToken = jwt.verify(req.token, process.env.SECRET);
+
+  if (!decodedToken.id) {
+    return res.status(401).json({ error: "token invalid" });
+  }
+
+  const user = await User.findById(decodedToken.id);
+  const blog = await Blog.findById(req.params.id);
+
+  if (user._id.toString() !== blog.user.toString()) {
+    return res.status(401).json({ error: "insufficient access rights" });
+  }
+
   await Blog.findByIdAndDelete(req.params.id);
   res.status(204).end();
 });
