@@ -134,6 +134,29 @@ describe("blog api", () => {
     });
   });
 
+  describe("DELETE /api/blogs/:id", () => {
+    test("should delete blog and respond with proper status code", async () => {
+      const getResponseAtStart = await api.get("/api/blogs");
+
+      const blogToDelete = getResponseAtStart.body[0];
+
+      await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+
+      const getResponseAtEnd = await api.get("/api/blogs");
+
+      assert.strictEqual(
+        getResponseAtEnd.body.length,
+        getResponseAtStart.body.length - 1
+      );
+      assert.strictEqual(
+        typeof getResponseAtEnd.body.find(
+          (blog) => blog.id === blogToDelete.id
+        ),
+        "undefined"
+      );
+    });
+  });
+
   after(async () => {
     await mongoose.connection.close();
   });
