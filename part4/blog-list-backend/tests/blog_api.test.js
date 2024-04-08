@@ -51,6 +51,22 @@ describe("blog api", () => {
 
       assert.strictEqual(response.body.length, initialBlogs.length);
     });
+
+    test("should include id field in every blog", async () => {
+      const response = await api.get("/api/blogs");
+
+      response.body.forEach((blog) => {
+        assert.strictEqual(typeof blog.id, "string");
+      });
+    });
+
+    test("shouldn't include _id field in a single blog", async () => {
+      const response = await api.get("/api/blogs");
+
+      response.body.forEach((blog) => {
+        assert.strictEqual(typeof blog._id, "undefined");
+      });
+    });
   });
 
   after(async () => {
