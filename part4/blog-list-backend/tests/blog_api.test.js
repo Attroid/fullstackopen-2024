@@ -157,6 +157,44 @@ describe("blog api", () => {
     });
   });
 
+  describe("PUT /api/blogs/:id", () => {
+    test("should update blog and respond with proper status code", async () => {
+      const getResponseAtStart = await api.get("/api/blogs");
+
+      const blogToUpdate = getResponseAtStart.body[0];
+
+      const dataForPut = {
+        title: "Edited blog title",
+        author: "Not me",
+        likes: 123,
+        url: "none",
+      };
+
+      const putResponse = await api
+        .put(`/api/blogs/${blogToUpdate.id}`)
+        .send(dataForPut)
+        .expect(200);
+
+      const getResponseAtEnd = await api.get("/api/blogs");
+
+      assert.strictEqual(
+        getResponseAtEnd.body.length,
+        getResponseAtStart.body.length
+      );
+
+      const blogFromResponseAtEnd = getResponseAtEnd.body.find(
+        (blog) => blog.id === blogToUpdate.id
+      );
+
+      assert.deepStrictEqual(putResponse.body, blogFromResponseAtEnd);
+
+      assert.strictEqual(blogFromResponseAtEnd.title, dataForPut.title);
+      assert.strictEqual(blogFromResponseAtEnd.author, dataForPut.author);
+      assert.strictEqual(blogFromResponseAtEnd.likes, dataForPut.likes);
+      assert.strictEqual(blogFromResponseAtEnd.url, dataForPut.url);
+    });
+  });
+
   after(async () => {
     await mongoose.connection.close();
   });
