@@ -6,9 +6,11 @@ import loginService from "./services/login";
 import axios from "axios";
 import LoginForm from "./components/LoginForm";
 import BlogForm from "./components/BlogForm";
+import Togglable from "./components/Togglable";
 
 const App = () => {
   const notificationRef = useRef();
+  const blogFormRef = useRef();
   const [user, setUser] = useState(null);
   const [blogs, setBlogs] = useState([]);
 
@@ -56,6 +58,7 @@ const App = () => {
       await blogService.create(blog);
       setBlogs(await blogService.getAll());
       notificationRef.current.showSuccess(`a new blog ${blog.title} added`);
+      blogFormRef.current.toggleVisibility();
     } catch (error) {
       if (axios.isAxiosError(error)) {
         notificationRef.current.showError(error.response.data.error);
@@ -86,7 +89,9 @@ const App = () => {
         <Blog key={blog.id} blog={blog} />
       ))}
 
-      <BlogForm onSubmit={handleBlogCreation} />
+      <Togglable buttonLabel="new blog" ref={blogFormRef}>
+        <BlogForm onSubmit={handleBlogCreation} />
+      </Togglable>
     </div>
   );
 };
