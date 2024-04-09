@@ -55,6 +55,7 @@ const App = () => {
     try {
       await blogService.create(blog);
       setBlogs(await blogService.getAll());
+      notificationRef.current.showSuccess(`a new blog ${blog.title} added`);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         notificationRef.current.showError(error.response.data.error);
