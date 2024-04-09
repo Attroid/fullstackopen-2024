@@ -144,4 +144,6 @@ const App = () => {
   );
 };
 
+App.displayName = "App";
+
 export default App;

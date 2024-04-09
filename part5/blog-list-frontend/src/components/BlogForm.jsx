@@ -1,4 +1,9 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
+
+const propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+};
 
 const BlogForm = (props) => {
   const [blog, setBlog] = useState({
@@ -43,5 +48,8 @@ const BlogForm = (props) => {
     </form>
   );
 };
+
+BlogForm.propTypes = propTypes;
+BlogForm.displayName = "BlogForm";
 
 export default BlogForm;

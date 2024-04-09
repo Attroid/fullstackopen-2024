@@ -1,21 +1,24 @@
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useImperativeHandle, useState, useCallback } from "react";
 
 const Notification = forwardRef((_, ref) => {
   const [notification, setNotification] = useState(null);
 
-  const showNotification = (message, type) => {
-    if (notification) {
-      clearTimeout(notification.timeoutId);
-    }
+  const showNotification = useCallback(
+    (message, type) => {
+      if (notification) {
+        clearTimeout(notification.timeoutId);
+      }
 
-    setNotification({
-      message,
-      type,
-      timeoutId: setTimeout(() => {
-        setNotification(null);
-      }, 5000),
-    });
-  };
+      setNotification({
+        message,
+        type,
+        timeoutId: setTimeout(() => {
+          setNotification(null);
+        }, 5000),
+      });
+    },
+    [notification]
+  );
 
   useImperativeHandle(
     ref,
@@ -23,7 +26,7 @@ const Notification = forwardRef((_, ref) => {
       showSuccess: (message) => showNotification(message, "success"),
       showError: (message) => showNotification(message, "error"),
     }),
-    []
+    [showNotification]
   );
 
   if (!notification) return null;
@@ -37,5 +40,7 @@ const Notification = forwardRef((_, ref) => {
 
   return <div style={style}>{notification.message}</div>;
 });
+
+Notification.displayName = "Notification";
 
 export default Notification;

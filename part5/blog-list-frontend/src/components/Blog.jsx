@@ -1,4 +1,25 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
+
+export const blogPropType = PropTypes.shape({
+  id: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  author: PropTypes.string.isRequired,
+  url: PropTypes.string.isRequired,
+  likes: PropTypes.number.isRequired,
+  user: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    username: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+  }).isRequired,
+});
+
+const propTypes = {
+  blog: blogPropType.isRequired,
+  onLike: PropTypes.func.isRequired,
+  onRemove: PropTypes.func.isRequired,
+  hasAccess: PropTypes.bool,
+};
 
 const Blog = (props) => {
   const [open, setOpen] = useState(false);
@@ -38,5 +59,8 @@ const Blog = (props) => {
     </div>
   );
 };
+
+Blog.propTypes = propTypes;
+Blog.displayName = "Blog";
 
 export default Blog;
