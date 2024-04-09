@@ -41,4 +41,24 @@ describe("Blog List app", () => {
     // Login button
     await expect(page.getByRole("button", { name: "login" })).toBeVisible();
   });
+
+  describe("Login", () => {
+    test("succeeds with correct credentials", async ({ page }) => {
+      await page.getByTestId("username").fill("mluukkai");
+      await page.getByTestId("password").fill("salainen");
+      await page.getByRole("button", { name: "login" }).click();
+
+      await expect(page.getByText("Logged in succesfully")).toBeVisible();
+    });
+
+    test("fails with wrong credentials", async ({ page }) => {
+      await page.getByTestId("username").fill("iakkuulm");
+      await page.getByTestId("password").fill("nenialas");
+      await page.getByRole("button", { name: "login" }).click();
+
+      await expect(
+        page.getByText("invalid username or password")
+      ).toBeVisible();
+    });
+  });
 });
