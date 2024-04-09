@@ -106,5 +106,25 @@ describe("Blog List app", () => {
       await page.getByRole("button", { name: "like" }).click();
       await expect(page.getByText("likes 1")).toBeVisible();
     });
+
+    test("blog can be deleted by user", async ({ page }) => {
+      // Submit new blog
+      await page.getByRole("button", { name: "new blog" }).click();
+
+      await page.getByTestId("blog-form-title").fill("Ruoho on kasvanut");
+      await page.getByTestId("blog-form-author").fill("Atte Koivukangas");
+      await page.getByTestId("blog-form-url").fill("http://taakse.poistu");
+      await page.getByRole("button", { name: "create" }).click();
+      await page.getByRole("button", { name: "view" }).click();
+
+      page.on("dialog", (dialog) => dialog.accept());
+
+      await page.getByRole("button", { name: "remove" }).click();
+
+      await expect(
+        page.getByText("Ruoho on kasvanut", { exact: true })
+      ).toHaveCount(0);
+      await expect(page.getByText("Atte Koivukangas")).toHaveCount(0);
+    });
   });
 });
