@@ -22,6 +22,7 @@ const LoginForm = (props) => {
       <div>
         username
         <input
+          data-testid="username"
           type="text"
           value={credentials.username}
           onChange={(ev) =>
@@ -32,6 +33,7 @@ const LoginForm = (props) => {
       <div>
         password
         <input
+          data-testid="password"
           type="password"
           value={credentials.password}
           onChange={(ev) =>
