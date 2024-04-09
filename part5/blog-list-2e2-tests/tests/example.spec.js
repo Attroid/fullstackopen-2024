@@ -90,5 +90,21 @@ describe("Blog List app", () => {
       ).toBeVisible();
       await expect(page.getByText("Atte Koivukangas")).toBeVisible();
     });
+
+    // Do a test that makes sure the blog can be edited. = liked
+    test("blog can be liked by user", async ({ page }) => {
+      // Submit new blog
+      await page.getByRole("button", { name: "new blog" }).click();
+
+      await page.getByTestId("blog-form-title").fill("Ruoho on kasvanut");
+      await page.getByTestId("blog-form-author").fill("Atte Koivukangas");
+      await page.getByTestId("blog-form-url").fill("http://taakse.poistu");
+
+      await page.getByRole("button", { name: "create" }).click();
+      await page.getByRole("button", { name: "view" }).click();
+      await expect(page.getByText("likes 0")).toBeVisible();
+      await page.getByRole("button", { name: "like" }).click();
+      await expect(page.getByText("likes 1")).toBeVisible();
+    });
   });
 });
