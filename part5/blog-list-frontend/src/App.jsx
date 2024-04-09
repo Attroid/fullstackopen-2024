@@ -107,9 +107,11 @@ const App = () => {
         {user.name} logged in
         <button onClick={handleLogout}>logout</button>
       </p>
-      {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} onLike={handleBlogLike} />
-      ))}
+      {blogs
+        .toSorted((blogA, blogB) => blogB.likes - blogA.likes)
+        .map((blog) => (
+          <Blog key={blog.id} blog={blog} onLike={handleBlogLike} />
+        ))}
 
       <Togglable buttonLabel="new blog" ref={blogFormRef}>
         <BlogForm onSubmit={handleBlogCreation} />
