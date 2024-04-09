@@ -37,7 +37,7 @@ const Blog = (props) => {
   };
 
   return (
-    <div style={wrapperStyle}>
+    <div style={wrapperStyle} className="blog">
       <button style={toggleButtonStyle} onClick={() => setOpen(!open)}>
         {open ? "hide" : "view"}
       </button>

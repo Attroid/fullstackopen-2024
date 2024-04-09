@@ -162,4 +162,71 @@ describe("Blog List app", () => {
       await expect(page.getByRole("button", { name: "remove" })).toHaveCount(0);
     });
   });
+
+  test("blog's are ordered by like amount", async ({ page, request }) => {
+    // Create three blogs
+    const loginResponse = await request.post(
+      "http://localhost:3003/api/login",
+      {
+        data: {
+          username: "akoivuk",
+          password: "salainen",
+        },
+      }
+    );
+
+    const { token } = await loginResponse.json();
+
+    await request.post("http://localhost:3003/api/blogs", {
+      data: {
+        title: "AAA",
+        author: "Pekka",
+        url: "111",
+        likes: 5,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    await request.post("http://localhost:3003/api/blogs", {
+      data: {
+        title: "BBB",
+        author: "Kalle",
+        url: "222",
+        likes: 2,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    await request.post("http://localhost:3003/api/blogs", {
+      data: {
+        title: "CCC",
+        author: "Mauri",
+        url: "333",
+        likes: 8,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    await page.reload();
+    await page.getByTestId("username").fill("mluukkai");
+    await page.getByTestId("password").fill("salainen");
+    await page.getByRole("button", { name: "login" }).click();
+
+    /*
+      The order should be:
+      1. CCC Mauri (8 likes)
+      2. AAA Pekka (5 likes)
+      3. BBB Kalle (2 likes)
+    */
+    await expect(page.locator(".blog")).toHaveCount(3);
+    expect(await page.locator(".blog").nth(0).textContent()).toContain("CCC");
+    expect(await page.locator(".blog").nth(1).textContent()).toContain("AAA");
+    expect(await page.locator(".blog").nth(2).textContent()).toContain("BBB");
+  });
 });
