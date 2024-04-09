@@ -13,7 +13,7 @@ const Notification = forwardRef((_, ref) => {
       type,
       timeoutId: setTimeout(() => {
         setNotification(null);
-      }, 50000),
+      }, 5000),
     });
   };
 

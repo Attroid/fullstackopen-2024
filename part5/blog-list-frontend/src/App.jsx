@@ -5,6 +5,7 @@ import Notification from "./components/Notification";
 import loginService from "./services/login";
 import axios from "axios";
 import LoginForm from "./components/LoginForm";
+import BlogForm from "./components/BlogForm";
 
 const App = () => {
   const notificationRef = useRef();
@@ -12,7 +13,9 @@ const App = () => {
   const [blogs, setBlogs] = useState([]);
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
+    (async () => {
+      setBlogs(await blogService.getAll());
+    })();
   }, []);
 
   useEffect(() => {
@@ -22,7 +25,9 @@ const App = () => {
       return;
     }
 
-    setUser(JSON.parse(userJSON));
+    const user = JSON.parse(userJSON);
+    setUser(user);
+    blogService.setToken(user.token);
   }, []);
 
   const handleLogout = () => {
@@ -35,7 +40,21 @@ const App = () => {
       const user = await loginService.login(credentials);
       window.localStorage.setItem("user", JSON.stringify(user));
       setUser(user);
+      blogService.setToken(user.token);
       notificationRef.current.showSuccess("Logged in succesfully");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        notificationRef.current.showError(error.response.data.error);
+      } else {
+        notificationRef.current.showError(error.message);
+      }
+    }
+  };
+
+  const handleBlogCreation = async (blog) => {
+    try {
+      await blogService.create(blog);
+      setBlogs(await blogService.getAll());
     } catch (error) {
       if (axios.isAxiosError(error)) {
         notificationRef.current.showError(error.response.data.error);
@@ -65,6 +84,8 @@ const App = () => {
       {blogs.map((blog) => (
         <Blog key={blog.id} blog={blog} />
       ))}
+
+      <BlogForm onSubmit={handleBlogCreation} />
     </div>
   );
 };
