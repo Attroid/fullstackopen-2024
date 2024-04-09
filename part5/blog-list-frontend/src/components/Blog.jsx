@@ -41,7 +41,7 @@ const Blog = (props) => {
       <button style={toggleButtonStyle} onClick={() => setOpen(!open)}>
         {open ? "hide" : "view"}
       </button>
-      {props.blog.title} {props.blog.author}
+      <span>{props.blog.title}</span> <span>{props.blog.author}</span>
       {open && (
         <>
           <hr />
