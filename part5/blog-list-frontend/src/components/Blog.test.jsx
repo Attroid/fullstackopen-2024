@@ -1,12 +1,6 @@
-/*
-Make a test, which checks that the component displaying a blog renders
-the blog's title and author, but does not render its URL or number of
-likes by default.
-
-Add CSS classes to the component to help the testing as necessary.
-*/
 import { render, screen } from "@testing-library/react";
 import Blog from "./Blog";
+import userEvent from "@testing-library/user-event";
 
 describe("Blog component", () => {
   test("renders blog's title and author by default while excluding URL and number of likes", () => {
@@ -35,5 +29,31 @@ describe("Blog component", () => {
     expect(
       screen.queryByText((content) => content.includes(`likes ${blog.likes}`))
     ).toBeNull();
+  });
+
+  test("renders URL and number of likes after user clicks 'view' button", async () => {
+    const blog = {
+      id: "fake-blog-id-123",
+      title: "Ruoho on vihreampaa aidan toisella puolella",
+      author: "Matti Meikalainen",
+      url: "http://taakse.poistu",
+      likes: 5,
+      user: {
+        id: "fake-user-id-123",
+        username: "fakeuser",
+        name: "Fake User",
+      },
+    };
+
+    render(
+      <Blog blog={blog} onLike={() => {}} onRemove={() => {}} hasAccess />
+    );
+
+    const user = userEvent.setup();
+    const button = screen.getByText("view");
+    await user.click(button);
+
+    expect(screen.getByText(blog.url)).toBeDefined();
+    expect(screen.getByText(`likes ${blog.likes}`)).toBeDefined();
   });
 });
