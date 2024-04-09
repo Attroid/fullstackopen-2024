@@ -23,6 +23,7 @@ const BlogForm = (props) => {
       <div>
         title
         <input
+          id="blog-form-title"
           type="text"
           value={blog.title}
           onChange={(ev) => setBlog({ ...blog, title: ev.target.value })}
@@ -31,6 +32,7 @@ const BlogForm = (props) => {
       <div>
         author
         <input
+          id="blog-form-author"
           type="text"
           value={blog.author}
           onChange={(ev) => setBlog({ ...blog, author: ev.target.value })}
@@ -39,6 +41,7 @@ const BlogForm = (props) => {
       <div>
         url
         <input
+          id="blog-form-url"
           type="text"
           value={blog.url}
           onChange={(ev) => setBlog({ ...blog, url: ev.target.value })}
