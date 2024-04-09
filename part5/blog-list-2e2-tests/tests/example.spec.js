@@ -61,4 +61,34 @@ describe("Blog List app", () => {
       ).toBeVisible();
     });
   });
+
+  describe("When logged in", () => {
+    beforeEach(async ({ page }) => {
+      await page.getByTestId("username").fill("mluukkai");
+      await page.getByTestId("password").fill("salainen");
+      await page.getByRole("button", { name: "login" }).click();
+    });
+
+    test("a new blog can be created", async ({ page }) => {
+      // Submit new blog
+      await page.getByRole("button", { name: "new blog" }).click();
+
+      await page.getByTestId("blog-form-title").fill("Ruoho on kasvanut");
+      await page.getByTestId("blog-form-author").fill("Atte Koivukangas");
+      await page.getByTestId("blog-form-url").fill("http://taakse.poistu");
+
+      await page.getByRole("button", { name: "create" }).click();
+
+      // Test that blog exists in view
+      // + check that BlogForm is hidden to ensure that these checks don't
+      // pass just because of filled inputs
+      await expect(page.getByTestId("blog-form-title")).toHaveCount(0);
+      await expect(page.getByTestId("blog-form-author")).toHaveCount(0);
+
+      await expect(
+        page.getByText("Ruoho on kasvanut", { exact: true })
+      ).toBeVisible();
+      await expect(page.getByText("Atte Koivukangas")).toBeVisible();
+    });
+  });
 });
