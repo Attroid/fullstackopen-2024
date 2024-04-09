@@ -22,6 +22,13 @@ describe("Blog List app", () => {
         password: "salainen",
       },
     });
+    await request.post("http://localhost:3003/api/users", {
+      data: {
+        name: "Atte Koivukangas",
+        username: "akoivuk",
+        password: "salainen",
+      },
+    });
 
     await page.goto("http://localhost:5173");
   });
@@ -125,6 +132,34 @@ describe("Blog List app", () => {
         page.getByText("Ruoho on kasvanut", { exact: true })
       ).toHaveCount(0);
       await expect(page.getByText("Atte Koivukangas")).toHaveCount(0);
+    });
+
+    test("remove button can be seen only by the blog's creator", async ({
+      page,
+    }) => {
+      // Logged in as mluukkai, create blog
+      await page.getByRole("button", { name: "new blog" }).click();
+
+      await page.getByTestId("blog-form-title").fill("Ruoho on kasvanut");
+      await page.getByTestId("blog-form-author").fill("Atte Koivukangas");
+      await page.getByTestId("blog-form-url").fill("http://taakse.poistu");
+      await page.getByRole("button", { name: "create" }).click();
+
+      // Check that remove button exists
+      await page.getByRole("button", { name: "view" }).click();
+      await expect(page.getByRole("button", { name: "remove" })).toBeVisible();
+
+      // Logout
+      await page.getByRole("button", { name: "logout" }).click();
+
+      // Log in as akoivuk
+      await page.getByTestId("username").fill("akoivuk");
+      await page.getByTestId("password").fill("salainen");
+      await page.getByRole("button", { name: "login" }).click();
+
+      // Check that remove button doesn't exist
+      await page.getByRole("button", { name: "view" }).click();
+      await expect(page.getByRole("button", { name: "remove" })).toHaveCount(0);
     });
   });
 });
