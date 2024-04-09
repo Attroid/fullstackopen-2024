@@ -15,9 +15,25 @@ const App = () => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
   }, []);
 
+  useEffect(() => {
+    const userJSON = window.localStorage.getItem("user");
+
+    if (!userJSON) {
+      return;
+    }
+
+    setUser(JSON.parse(userJSON));
+  }, []);
+
+  const handleLogout = () => {
+    window.localStorage.clear();
+    setUser(null);
+  };
+
   const handleLogin = async (credentials) => {
     try {
       const user = await loginService.login(credentials);
+      window.localStorage.setItem("user", JSON.stringify(user));
       setUser(user);
       notificationRef.current.showSuccess("Logged in succesfully");
     } catch (error) {
@@ -42,7 +58,10 @@ const App = () => {
     <div>
       <Notification ref={notificationRef} />
       <h2>blogs</h2>
-      <p>{user.name} logged in</p>
+      <p>
+        {user.name} logged in
+        <button onClick={handleLogout}>logout</button>
+      </p>
       {blogs.map((blog) => (
         <Blog key={blog.id} blog={blog} />
       ))}
