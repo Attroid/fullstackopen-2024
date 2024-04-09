@@ -30,6 +30,9 @@ const Blog = (props) => {
             <button onClick={() => props.onLike(props.blog)}>like</button>
           </div>
           <div>{props.blog.user.name}</div>
+          {props.hasAccess && (
+            <button onClick={() => props.onRemove(props.blog)}>remove</button>
+          )}
         </>
       )}
     </div>

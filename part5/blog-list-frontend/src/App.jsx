@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import Notification from "./components/Notification";
 import loginService from "./services/login";
@@ -7,6 +6,7 @@ import axios from "axios";
 import LoginForm from "./components/LoginForm";
 import BlogForm from "./components/BlogForm";
 import Togglable from "./components/Togglable";
+import BlogList from "./components/BlogList";
 
 const App = () => {
   const notificationRef = useRef();
@@ -90,6 +90,26 @@ const App = () => {
     }
   };
 
+  const handleBlogRemove = async (blog) => {
+    if (!window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
+      return;
+    }
+
+    try {
+      await blogService.remove(blog.id);
+      setBlogs(await blogService.getAll());
+      notificationRef.current.showSuccess(
+        `deleted the blog ${blog.title} succesfully`
+      );
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        notificationRef.current.showError(error.response.data.error);
+      } else {
+        notificationRef.current.showError(error.message);
+      }
+    }
+  };
+
   if (!user) {
     return (
       <div>
@@ -107,11 +127,15 @@ const App = () => {
         {user.name} logged in
         <button onClick={handleLogout}>logout</button>
       </p>
-      {blogs
-        .toSorted((blogA, blogB) => blogB.likes - blogA.likes)
-        .map((blog) => (
-          <Blog key={blog.id} blog={blog} onLike={handleBlogLike} />
-        ))}
+
+      <BlogList
+        blogs={blogs}
+        onLike={handleBlogLike}
+        onRemove={handleBlogRemove}
+        checkAccessRights={(blog) => {
+          return blog.user.username === user.username;
+        }}
+      />
 
       <Togglable buttonLabel="new blog" ref={blogFormRef}>
         <BlogForm onSubmit={handleBlogCreation} />
