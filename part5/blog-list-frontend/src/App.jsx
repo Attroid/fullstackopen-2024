@@ -68,6 +68,28 @@ const App = () => {
     }
   };
 
+  const handleBlogLike = async (blog) => {
+    try {
+      await blogService.update(blog.id, {
+        user: blog.user.id,
+        likes: blog.likes + 1,
+        author: blog.author,
+        title: blog.title,
+        url: blog.url,
+      });
+      setBlogs(await blogService.getAll());
+      notificationRef.current.showSuccess(
+        `liked the blog ${blog.title} succesfully`
+      );
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        notificationRef.current.showError(error.response.data.error);
+      } else {
+        notificationRef.current.showError(error.message);
+      }
+    }
+  };
+
   if (!user) {
     return (
       <div>
@@ -86,7 +108,7 @@ const App = () => {
         <button onClick={handleLogout}>logout</button>
       </p>
       {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} onLike={handleBlogLike} />
       ))}
 
       <Togglable buttonLabel="new blog" ref={blogFormRef}>

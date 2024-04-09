@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const Blog = ({ blog }) => {
+const Blog = (props) => {
   const [open, setOpen] = useState(false);
 
   const wrapperStyle = {
@@ -20,15 +20,16 @@ const Blog = ({ blog }) => {
       <button style={toggleButtonStyle} onClick={() => setOpen(!open)}>
         {open ? "hide" : "view"}
       </button>
-      {blog.title} {blog.author}
+      {props.blog.title} {props.blog.author}
       {open && (
         <>
           <hr />
-          <div>{blog.url}</div>
+          <div>{props.blog.url}</div>
           <div>
-            likes {blog.likes} <button>like</button>
+            likes {props.blog.likes}{" "}
+            <button onClick={() => props.onLike(props.blog)}>like</button>
           </div>
-          <div>{blog.user.name}</div>
+          <div>{props.blog.user.name}</div>
         </>
       )}
     </div>
