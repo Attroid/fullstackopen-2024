@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
 const useField = (type) => {
@@ -18,10 +18,18 @@ const useField = (type) => {
 const useResource = (baseUrl) => {
   const [resources, setResources] = useState([]);
 
-  // ...
+  const refreshResources = useCallback(async () => {
+    const response = await axios.get(baseUrl);
+    setResources(response.data);
+  }, [baseUrl]);
 
-  const create = (resource) => {
-    // ...
+  useEffect(() => {
+    refreshResources();
+  }, [refreshResources]);
+
+  const create = async (resource) => {
+    await axios.post(baseUrl, resource);
+    refreshResources();
   };
 
   const service = {
