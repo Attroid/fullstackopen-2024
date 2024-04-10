@@ -1,4 +1,5 @@
 const VOTE = "anecdoteReducer/vote";
+const CREATE = "anecdoteReducer/create";
 
 const anecdotesAtStart = [
   "If it hurts, do it more often",
@@ -22,11 +23,19 @@ const initialState = anecdotesAtStart.map(asObject);
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case VOTE: {
+      const { anecdoteId } = action.payload;
+
       return state.map((anecdote) =>
-        anecdote.id === action.payload.anecdoteId
+        anecdote.id === anecdoteId
           ? { ...anecdote, votes: anecdote.votes + 1 }
           : anecdote
       );
+    }
+
+    case CREATE: {
+      const { content } = action.payload;
+
+      return state.concat(asObject(content));
     }
 
     default: {
@@ -38,6 +47,11 @@ const reducer = (state = initialState, action) => {
 export const voteAnecdote = (anecdoteId) => ({
   type: VOTE,
   payload: { anecdoteId },
+});
+
+export const createAnecdote = (content) => ({
+  type: CREATE,
+  payload: { content },
 });
 
 export default reducer;
