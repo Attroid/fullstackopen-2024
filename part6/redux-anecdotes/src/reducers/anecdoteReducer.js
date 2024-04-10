@@ -31,7 +31,7 @@ export const voteAnecdote = (anecdoteId) => {
       votes: anecdote.votes + 1,
     });
 
-    dispatch(showNotification(`you voted '${anecdote.content}'`));
+    dispatch(showNotification(`you voted '${anecdote.content}'`, 5));
     dispatch(anecdoteSlice.actions.updateAnecdote(updatedAnecdote));
   };
 };
@@ -40,7 +40,9 @@ export const createAnecdote = (content) => {
   return async (dispatch) => {
     const createdAnecdote = await anecdoteService.create({ content, votes: 0 });
     dispatch(anecdoteSlice.actions.appendAnecdote(createdAnecdote));
-    dispatch(showNotification(`added anecdote '${createdAnecdote.content}'`));
+    dispatch(
+      showNotification(`added anecdote '${createdAnecdote.content}'`, 5)
+    );
   };
 };
 
