@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNotificationDispatch } from "../NotificationContext";
 import { createAnecdote } from "../requests";
 import { useState } from "react";
+import axios from "axios";
 
 const AnecdoteForm = () => {
   const notificationDispatch = useNotificationDispatch();
@@ -19,6 +20,23 @@ const AnecdoteForm = () => {
         type: "SET_NOTIFICATION",
         payload: {
           message: `added anecdote '${createdAnecdote.content}'`,
+          timeoutId,
+        },
+      });
+    },
+    onError: (error) => {
+      const message = axios.isAxiosError(error)
+        ? error.response.data.error
+        : error.message;
+
+      const timeoutId = setTimeout(() => {
+        notificationDispatch({ type: "CLEAR_NOTIFICATION" });
+      }, 5000);
+
+      notificationDispatch({
+        type: "SET_NOTIFICATION",
+        payload: {
+          message,
           timeoutId,
         },
       });
